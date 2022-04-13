@@ -1,0 +1,51 @@
+#define BLYNK_PRINT Serial
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+BlynkTimer timer;
+char auth[] = "BlnkyToken";
+char ssid[] = "SDVC";
+char pass[] = "WifiCredentials psd";
+int flag = 0;
+WidgetLED led1(V1); // widget for Virtual D1
+WidgetLED led2(V2); // widget for Virtual D2
+
+void notifyOnThings() {
+  int IRval1 = digitalRead(D1); // pin IrSensor on NodeMcu D1
+  int IRval2 = digitalRead(D2); // pin IrSensor on NodeMcu D2
+  if (IRval1 == 1 ) {
+    Serial.println("Alert: SLOT 1 is not available");
+    Blynk.notify("Alert: Slot1 is not available");
+    led1.on();
+    // flag=1;
+  }
+  if (IRval2 == 1) {
+    Serial.println("Alert: SLOT 2 is not available");
+    Blynk.notify("Alert: Slot2 is not Available");
+    led2.on();
+    //flag==0;
+  }
+  if (IRval1 == 0) {
+    Serial.println("Alert: SLOT 1 is  available");
+    Blynk.notify("Alert: Slot1 is  Available");
+    led2.off();
+    //flag==0;
+    if (IRval2 == 0) {
+      Serial.println("Alert: SLOT 2 is availableg");
+      Blynk.notify("Alert: Slot2 is  Available");
+      led2.off();
+      //flag==0;
+    }
+  }
+}
+  void setup() {
+    Serial.begin(9600);
+    Blynk.begin(auth, ssid, pass);
+    pinMode(D1, INPUT_PULLUP);
+    pinMode(D2, INPUT_PULLUP);
+    timer.setInterval(1000L, notifyOnThings);
+  }
+
+  void loop() {
+    Blynk.run();
+    timer.run();
+  }
